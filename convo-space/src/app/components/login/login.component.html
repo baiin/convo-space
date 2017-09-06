@@ -1,0 +1,10 @@
+<p>
+  <a routerLink="/register">register</a>
+</p>
+
+<div>
+  <input class="form-control" type="email" placeholder="email" #email>
+  <input class="form-control" type="password" placeholder="password" #password>
+</div>
+
+<button class="btn btn-info" (click)="login(email.value, password.value)">login</button>

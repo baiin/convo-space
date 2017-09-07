@@ -15,11 +15,14 @@ import { NgClass } from '@angular/common';
 export class RegisterComponent implements OnInit {
 
   disableReg: boolean;
+  userObservable: FirebaseListObservable<any[]>;
 
   constructor(public afAuth: AngularFireAuth, public db: AngularFireDatabase, public router: Router) { }
 
   ngOnInit() {
     this.disableReg = false;
+    
+    this.userObservable = this.db.list('/users');
   }
 
   register(email, name, password, passwordConfirm){
@@ -30,12 +33,22 @@ export class RegisterComponent implements OnInit {
     else{
       this.afAuth.auth.createUserWithEmailAndPassword(email, password)
       .then((user) => {
-        var u = firebase.auth().currentUser;
-        u.updateProfile({
+        const path = `users/${user.uid}`;
+
+        const data = {
+          email: email,
           displayName: name,
-          photoURL: ""
+          status: 'offline'
+        };
+
+        this.db.object(path).update(data)
+        .then(data => {
+          console.log('registration successful');
+          this.router.navigate(['login']);
         })
-        .then(data => this.router.navigate(['login']));
+        .catch(error => {
+          console.log(error);
+        });
       })
       .catch(error => console.log(error));
     }

@@ -1,2 +1,2 @@
-<h3>{{ user }}</h3>
+<h3>{{ (user | async)?.displayName }}</h3>
 <button class="btn btn-danger" (click)="logout()">logout</button>

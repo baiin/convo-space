@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase/app';
@@ -12,17 +12,16 @@ import * as firebase from 'firebase/app';
 })
 export class HomeComponent implements OnInit {
 
-  user: string;
+  user: FirebaseObjectObservable<any[]>;
 
-  constructor(public router: Router, public afAuth: AngularFireAuth) { }
+  constructor(public router: Router, public afAuth: AngularFireAuth, public db: AngularFireDatabase) { }
 
   ngOnInit() {
-    this.user = ""; 
-
     this.afAuth.authState.subscribe(auth => {
       if(auth){
-        console.log(auth);
-        this.user = auth.displayName;
+        const path = `users/${auth.uid}`;
+
+        this.user = this.db.object(path);
       }
       else{
         this.router.navigate(['login']);
@@ -31,6 +30,7 @@ export class HomeComponent implements OnInit {
   }
 
   logout(){
+    console.log('logout');
     this.afAuth.auth.signOut()
     .then(data => {
       console.log('logged out');

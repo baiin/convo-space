@@ -1,2 +1,24 @@
-<h3>{{ (user | async)?.displayName }}</h3>
-<button class="btn btn-danger" (click)="logout()">logout</button>
+<div class="navbar row">
+    <span class="col-xs-10">{{ (userOb | async)?.displayName }}</span>
+    <button class="btn btn-danger col-xs-2" (click)="logout()">logout</button>
+</div>
+
+<div class="sidebar">
+    <div *ngFor="let user of users">
+        <div class="status"></div>
+        <span class="onlineUser">{{ user.displayName }}</span>
+    </div>
+</div>
+
+<div class="content">
+    <p class="message" *ngFor="let message of messages">
+        <span *ngIf="message.self" style="color:green;font-weight:bold;">{{ message.displayName }}</span> 
+        <span *ngIf="!message.self" style="color:orange;font-weight:bold;">{{ message.displayName }}</span> 
+        <br/> {{ message.body }} 
+    </p>
+</div>
+
+<div class="inputBox">
+    <input type="text" id="textInput" style="width:100%;display:inline-block;height:50px;" placeholder="type here..." (keydown)="inputEvent($event, body.value)" #body>
+</div>
+

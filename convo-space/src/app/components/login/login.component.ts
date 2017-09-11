@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(public afAuth: AngularFireAuth, public af: AngularFireDatabase, public router: Router) { }
+  constructor(public afAuth: AngularFireAuth, public db: AngularFireDatabase, public router: Router) { }
 
   ngOnInit() {
     this.afAuth.authState.subscribe(auth => {
@@ -28,8 +28,14 @@ export class LoginComponent implements OnInit {
   login(email, password){
     this.afAuth.auth.signInWithEmailAndPassword(email, password)
     .then(data => {
-      console.log("logged in");
-      this.router.navigate(['']);
+
+      const path = `users/${data.uid}`;
+
+      this.db.object(path).update({'status': 'online'})
+      .then(value => {
+        console.log("logged in");
+        this.router.navigate(['']);
+      });
     })
     .catch(error => {
       console.log("error: " + error);

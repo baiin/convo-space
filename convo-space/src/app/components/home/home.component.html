@@ -1,6 +1,15 @@
-<div class="navbar row">
-    <span class="col-xs-10">{{ (userOb | async)?.displayName }}</span>
-    <button class="btn btn-danger col-xs-2" (click)="logout()">logout</button>
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar-header">
+        <a class="navbar-brand" style="color:white">
+            ConvoSpace
+        </a>
+    </div>
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right" style="margin-right:20px">
+            <li><a>{{ user.displayName }}</a></li>
+            <li><a (click)="logout()">Logout</a></li>
+        </ul>
+    </div>
 </div>
 
 <div class="sidebar">
@@ -10,15 +19,29 @@
     </div>
 </div>
 
-<div class="content">
-    <p class="message" *ngFor="let message of messages">
-        <span *ngIf="message.self" style="color:green;font-weight:bold;">{{ message.displayName }}</span> 
-        <span *ngIf="!message.self" style="color:orange;font-weight:bold;">{{ message.displayName }}</span> 
-        <br/> {{ message.body }} 
-    </p>
+<div class="content" id="content">
+    <div *ngFor="let message of messages" class="row" style="margin:0;padding:0;">
+        <div *ngIf="message.self">
+            <div class="message col-xs-11"  style="float:right;clear:right;">
+                <p>
+                    <span style="color:green;font-weight:bold;">{{ message.displayName }}</span> 
+                    <br/> {{ message.body }} 
+                </p>
+            </div>
+        </div>
+
+        <div *ngIf="!message.self">
+            <div class="message col-xs-11">
+                <p>
+                    <span style="color:orange;font-weight:bold;">{{ message.displayName }}</span> 
+                    <br/> {{ message.body }} 
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="inputBox">
-    <input type="text" id="textInput" style="width:100%;display:inline-block;height:50px;" placeholder="type here..." (keydown)="inputEvent($event, body.value)" #body>
+    <input type="text" id="textInput" style="width:100%;display:inline-block;height:50px;padding:10px;" placeholder="type here..." (keydown)="inputEvent($event, body.value)" #body>
 </div>
 

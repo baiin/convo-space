@@ -11,21 +11,14 @@ import * as firebase from 'firebase/app';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  userOb: FirebaseObjectObservable<any[]>;
-  usersOb: FirebaseListObservable<any[]>;
-
   users: any[];
   messages: any[];
-
   user: User;
 
   constructor(public router: Router, public afAuth: AngularFireAuth, public db: AngularFireDatabase) { }
 
   ngOnInit() {
-    if(this.afAuth.auth.currentUser){
-      this.userOb = this.db.object(`users/${this.afAuth.auth.currentUser.uid}`);
-    }
-    else{
+    if(!this.afAuth.auth.currentUser){
       this.router.navigate(['login']);
     }
 
@@ -71,6 +64,8 @@ export class HomeComponent implements OnInit {
           'self': snapshot.val().uid == this.afAuth.auth.currentUser.uid ? true : false
         });
       });
+
+      this.updateScroll();
     });
   }
 
@@ -102,7 +97,16 @@ export class HomeComponent implements OnInit {
       displayName: this.user.displayName
     };
 
+    this.updateScroll();
+
     this.db.list('messages').push(newMessage);
+  }
+
+  updateScroll(){
+    window.setTimeout(function() {
+      var elem = document.getElementById('content');
+      elem.scrollTop = elem.scrollHeight;
+    }, 100);
   }
 }
 

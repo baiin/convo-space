@@ -18,6 +18,13 @@ export class HomeComponent implements OnInit {
   constructor(public router: Router, public afAuth: AngularFireAuth, public db: AngularFireDatabase) { }
 
   ngOnInit() {
+    this.user = {
+      displayName: "",
+      email: "",
+      status: "",
+      uid: ""
+    }
+
     if(!this.afAuth.auth.currentUser){
       this.router.navigate(['login']);
     }
@@ -57,11 +64,18 @@ export class HomeComponent implements OnInit {
 
       this.messages = []
       snapshots.forEach(snapshot => {
+        let date = "";
+
+        if(snapshot.val().date){
+          date = snapshot.val().date.split("GMT")[0];
+        }
+
         this.messages.push({
           'uid': snapshot.val().uid,
           'body': snapshot.val().body,
           'displayName': snapshot.val().displayName,
-          'self': snapshot.val().uid == this.afAuth.auth.currentUser.uid ? true : false
+          'self': snapshot.val().uid == this.afAuth.auth.currentUser.uid ? true : false,
+          'date': date
         });
       });
 
@@ -91,10 +105,13 @@ export class HomeComponent implements OnInit {
   }
 
   sendMessage(body){
+    let date = new Date();
+
     let newMessage = {
       body: body,
       uid: this.user.uid,
-      displayName: this.user.displayName
+      displayName: this.user.displayName,
+      date: date.toString()
     };
 
     this.updateScroll();
@@ -116,6 +133,7 @@ interface Message
   uid:string;
   displayName:string;
   self:boolean;
+  date:string
 }
 
 interface User

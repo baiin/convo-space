@@ -102,7 +102,6 @@ export class HomeComponent implements OnInit {
       displayName: this.user.displayName
     };
 
-
     this.db.list('messages').push(newMessage);
   }
 }

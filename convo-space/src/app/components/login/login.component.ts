@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-import { AngularFireAuth } from 'angularfire2/auth';
-import { Observable } from 'rxjs/Observable';
-import * as firebase from 'firebase/app';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/authservice';
+import { ISubscription } from 'rxjs/Subscription';
+
 
 @Component({
   selector: 'app-login',
@@ -12,10 +11,18 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(public afAuth: AngularFireAuth, public db: AngularFireDatabase, public router: Router) { }
+  authSub: ISubscription;
+
+  constructor(public router: Router, private authService: AuthService) { }
+
+  ngOnDestroy()
+  {
+    this.authSub.unsubscribe();
+  }
 
   ngOnInit() {
-    this.afAuth.authState.subscribe(auth => {
+    this.authSub = this.authService.checkAuth()
+    .subscribe(auth => {
       if(auth){
         this.router.navigate(['']);
       }
@@ -26,19 +33,16 @@ export class LoginComponent implements OnInit {
   }
 
   login(email, password){
-    this.afAuth.auth.signInWithEmailAndPassword(email, password)
+    this.authService.login(email, password)
     .then(data => {
 
       const path = `users/${data.uid}`;
+      const obj = {'status': 'online'};
 
-      this.db.object(path).update({'status': 'online'})
+      this.authService.update(path, obj)
       .then(value => {
-        console.log("logged in");
         this.router.navigate(['']);
       });
-    })
-    .catch(error => {
-      console.log("error: " + error);
     });
   }
 }

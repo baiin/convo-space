@@ -12,6 +12,8 @@ import { HomeComponent } from './components/home/home.component';
 import { RouterModule, Routes } from '@angular/router';
 import { RegisterComponent } from './components/register/register.component';
 
+import { AuthService } from './services/authservice';
+
 const appRoutes:Routes = [
   {path: '', component: HomeComponent},
   {path: 'login', component: LoginComponent},
@@ -32,7 +34,7 @@ const appRoutes:Routes = [
     AngularFireDatabaseModule,
     RouterModule.forRoot(appRoutes)
   ],
-  providers: [],
+  providers: [AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

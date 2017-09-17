@@ -1,9 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AngularFireDatabase, FirebaseListObservable, FirebaseObjectObservable } from 'angularfire2/database';
-import { AngularFireAuth } from 'angularfire2/auth';
-import { Observable } from 'rxjs/Observable';
-import * as firebase from 'firebase/app';
+import { AuthService } from '../../services/authservice';
+import { ISubscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +13,18 @@ export class HomeComponent implements OnInit {
   messages: any[];
   user: User;
 
-  constructor(public router: Router, public afAuth: AngularFireAuth, public db: AngularFireDatabase) { }
+  authSub: ISubscription;
+  usersSub: ISubscription;
+  messagesSub: ISubscription;
+
+  constructor(public router: Router, public authService: AuthService) { }
+
+  ngOnDestroy()
+  {
+    this.authSub.unsubscribe();
+    this.usersSub.unsubscribe();
+    this.messagesSub.unsubscribe();
+  }
 
   ngOnInit() {
     this.user = {
@@ -25,23 +34,21 @@ export class HomeComponent implements OnInit {
       uid: ""
     }
 
-    if(!this.afAuth.auth.currentUser){
-      this.router.navigate(['login']);
-    }
+    this.authSub = this.authService.checkAuth()
+    .subscribe(user => {
+      if(!user){
+        this.router.navigate(['login']);
+      }
+      else{
+        console.log('logged in');
+      }
+    })
 
-    const usersOb = this.db.list('users', {
-      query: {
-        orderByChild: 'status',
-        equalTo: 'online'
-      },
-      preserveSnapshot: true
-    });
-
-    usersOb.subscribe(snapshots => {
-
+    this.usersSub = this.authService.loadUsers()
+    .subscribe(snapshots => {
       this.users = [];
       snapshots.forEach(snapshot => {
-        if(snapshot.key == this.afAuth.auth.currentUser.uid){
+        if(snapshot.key == this.authService.retrieveUID()){
           this.user = {
             uid: snapshot.key,
             displayName: snapshot.val().displayName,
@@ -56,12 +63,8 @@ export class HomeComponent implements OnInit {
       });
     });
 
-    const messagesOb = this.db.list('messages', {
-      preserveSnapshot: true
-    });
-
-    messagesOb.subscribe(snapshots => {
-
+    this.messagesSub = this.authService.loadMessages()
+    .subscribe(snapshots => {
       this.messages = []
       snapshots.forEach(snapshot => {
         let date = "";
@@ -74,7 +77,7 @@ export class HomeComponent implements OnInit {
           'uid': snapshot.val().uid,
           'body': snapshot.val().body,
           'displayName': snapshot.val().displayName,
-          'self': snapshot.val().uid == this.afAuth.auth.currentUser.uid ? true : false,
+          'self': snapshot.val().uid == this.authService.retrieveUID() ? true : false,
           'date': date
         });
       });
@@ -84,16 +87,15 @@ export class HomeComponent implements OnInit {
   }
 
   logout(){
-    this.db.object(`users/${this.afAuth.auth.currentUser.uid}`)
-    .update({'status': 'offline'})
+    const uid = this.authService.retrieveUID();
+    const path = `users/${uid}`;
+    const obj = {'status': 'offline'};
+
+    this.authService.update(path, obj)
     .then(value => {
-      this.afAuth.auth.signOut()
+      this.authService.logout()
       .then(_ => {
-        console.log('logged out');
         this.router.navigate(['login']);
-      })
-      .catch(error => {
-        console.log("error: " + error);
       });
     });
   }
@@ -116,7 +118,7 @@ export class HomeComponent implements OnInit {
 
     this.updateScroll();
 
-    this.db.list('messages').push(newMessage);
+    this.authService.pushData('messages', newMessage);
   }
 
   updateScroll(){

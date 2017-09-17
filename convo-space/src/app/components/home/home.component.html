@@ -44,6 +44,11 @@
 </div>
 
 <div class="inputBox">
-    <input type="text" id="textInput" style="width:100%;display:inline-block;height:50px;padding:10px;border-radius:5px;" placeholder="type here..." (keydown)="inputEvent($event, body.value)" #body>
+    <input  type="text"
+            [(ngModel)]="textInput"
+            value="textInput"  
+            style="width:100%;display:inline-block;height:50px;padding:10px;border-radius:5px;" 
+            placeholder="type here..." 
+            (keydown)="inputEvent($event)">
 </div>
 

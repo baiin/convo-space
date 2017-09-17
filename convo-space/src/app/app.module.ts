@@ -13,6 +13,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { RegisterComponent } from './components/register/register.component';
 
 import { AuthService } from './services/authservice';
+import { FormsModule } from '@angular/forms'
 
 const appRoutes:Routes = [
   {path: '', component: HomeComponent},
@@ -32,7 +33,8 @@ const appRoutes:Routes = [
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,
     AngularFireDatabaseModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
+    FormsModule
   ],
   providers: [AuthService],
   bootstrap: [AppComponent]

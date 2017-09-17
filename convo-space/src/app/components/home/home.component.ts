@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/authservice';
 import { ISubscription } from 'rxjs/Subscription';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
@@ -16,6 +17,8 @@ export class HomeComponent implements OnInit {
   authSub: ISubscription;
   usersSub: ISubscription;
   messagesSub: ISubscription;
+
+  textInput: string;
 
   constructor(public router: Router, public authService: AuthService) { }
 
@@ -33,6 +36,8 @@ export class HomeComponent implements OnInit {
       status: "",
       uid: ""
     }
+
+    this.textInput = "";
 
     this.authSub = this.authService.checkAuth()
     .subscribe(user => {
@@ -100,23 +105,25 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  inputEvent(event, body){
-    if(event.keyCode == 13){
-      this.sendMessage(body);
+  inputEvent(event){
+    if(event.keyCode == 13 && this.textInput != ""){
+      this.sendMessage();
     }
   }
 
-  sendMessage(body){
+  sendMessage(){
     let date = new Date();
-
+    
     let newMessage = {
-      body: body,
+      body: this.textInput,
       uid: this.user.uid,
       displayName: this.user.displayName,
       date: date.toString()
     };
 
     this.updateScroll();
+
+    this.textInput = "";
 
     this.authService.pushData('messages', newMessage);
   }
